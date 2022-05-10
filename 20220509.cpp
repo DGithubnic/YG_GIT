@@ -1,63 +1,111 @@
 #include <iostream>
+#include <conio.h>
+#include <windows.h>
 
 using namespace std;
 
-int ArraySum(int* Sum, int SumNum)
+struct FVector2D
 {
-	int Result = 0;
+	int X;
+	int Y;
+};
 
-	for (int i = 0; i < SumNum; i++)
-	{
-		Result += Sum[i];
-	}
+char Map[10][10] = {
+	{'#','#','#','#','#','#','#','#','#','#'},
+	{'#',' ',' ',' ',' ',' ',' ',' ',' ','#'},
+	{'#',' ',' ',' ',' ',' ',' ',' ',' ','#'},
+	{'#',' ',' ',' ',' ',' ',' ',' ',' ','#'},
+	{'#',' ',' ',' ',' ','#',' ',' ',' ','#'},
+	{'#',' ',' ',' ',' ',' ',' ',' ',' ','#'},
+	{'#',' ',' ',' ','#',' ',' ',' ',' ','#'},
+	{'#',' ',' ',' ',' ',' ',' ',' ',' ','#'},
+	{'#',' ',' ',' ',' ',' ',' ',' ',' ','#'},
+	{'#','#','#','#','#','#','#','#','#','#'}
+};
 
-	return Result;
-}
 
-void Sort(int* Sort, int SortNum)
+void SetLocation(FVector2D NewLocation);
+
+void DrawBG(FVector2D StartPosition)
 {
-	int Temp = 0;
-
-	for (int i = 0; i < SortNum - 1; i++)
+	for (int Y = 0; Y < 10; ++Y)
 	{
-		for (int j = 0; j < SortNum - 1; j++)
+		for (int X = 0; X < 10; ++X)
 		{
-			if (Sort[j] > Sort[j + 1])
-			{
-				Temp = Sort[j];
-				Sort[j] = Sort[j + 1];
-				Sort[j + 1] = Temp;
-				Temp = 0;
-			}
+			FVector2D Temp;
+			Temp.X = X + StartPosition.X;
+			Temp.Y = Y + StartPosition.Y;
+			SetLocation(Temp);
+			cout << Map[Y][X];
 		}
 	}
+
 }
 
 int main()
 {
-	int Size = 10;
+	bool bRunning = true;
+	FVector2D PlayerPosition;
+	PlayerPosition.X = 0;
+	PlayerPosition.Y = 0;
 
-	cout << "얼마만큼 입력을 받으시겠습니까?: ";
-	cin >> Size;
-	int* Arr = new int[Size];   // 사이즈 확정
+	srand(static_cast<unsigned int>(time(nullptr)));
+	FVector2D StartPosition;
+	StartPosition.X = rand() % 10 + 1;
+	StartPosition.Y = rand() % 10 + 1;
 
-	for (int i = 0; i < Size; i++)
+	while (bRunning)
 	{
-		cout << i + 1 << "번째 정수 입력: ";
-		cin >> Arr[i];
+		int KeyCode = _getch();
+
+		switch (KeyCode)
+		{
+		case 'w':
+		case 'W':
+			PlayerPosition.Y--;
+			break;
+		case 's':
+		case 'S':
+			PlayerPosition.Y++;
+			break;
+		case 'a':
+		case 'A':
+			PlayerPosition.X--;
+			break;
+		case 'd':
+		case 'D':
+			PlayerPosition.X++;
+			break;
+		case 27:
+			bRunning = false;
+			break;
+
+		}
+
+		PlayerPosition.X = PlayerPosition.X < 1 ? 1 : PlayerPosition.X;
+		PlayerPosition.Y = PlayerPosition.Y < 1 ? 1 : PlayerPosition.Y;
+		PlayerPosition.X = PlayerPosition.X >= 9 ? 8 : PlayerPosition.X;
+		PlayerPosition.Y = PlayerPosition.Y >= 9 ? 8 : PlayerPosition.Y;
+
+		system("cls");
+
+		DrawBG(StartPosition);
+		FVector2D Temp;
+		Temp.X = PlayerPosition.X + StartPosition.X;
+		Temp.Y = PlayerPosition.Y + StartPosition.Y;
+		SetLocation(Temp);
+		cout << "P";
 	}
 
-	Sort(Arr, Size);   // 정렬
-
-	for (int i = 0; i < Size; i++)
-	{
-		cout << Arr[i] << " ";
-	}
-
-	cout << endl;
-	cout << "합계: " << ArraySum(Arr, Size) << endl;   // 배열 자체를 전달(배열은 자체가 포인터)
-
-	delete[] Arr;   // delete 꼭 해줘야 함.
 
 	return 0;
+}
+
+
+void SetLocation(FVector2D NewLocation)
+{
+	COORD Cur;
+	Cur.X = NewLocation.X;
+	Cur.Y = NewLocation.Y;
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Cur);
 }
